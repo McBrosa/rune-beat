@@ -14,7 +14,18 @@ async def count_heartbeats(chan):
     readings = []  # Store recent voltage readings
     moving_avg_window = 10  # Number of readings to calculate moving average
 
+    # Initial loop to gather the first 10 voltage readings
+    while len(readings) < moving_avg_window:
+        voltage = chan.voltage
+        if voltage < 2:
+            await asyncio.sleep(0.2)
+            continue
+        readings.append(voltage)
+        print("Syncing...")
+        await asyncio.sleep(0.5)
+
     try:
+        print("Sync completed")
         while True:
             voltage = chan.voltage
             readings.append(voltage)
@@ -22,13 +33,13 @@ async def count_heartbeats(chan):
                 readings.pop(0)  # Remove the oldest reading
 
             moving_avg = sum(readings) / len(readings)
-            dynamic_threshold = moving_avg * 1.2  # Adjust multiplier as needed
+            dynamic_threshold = moving_avg * 1.618  # Adjust multiplier as needed
 
             if voltage > dynamic_threshold and (time.time() - last_beat_time) > 0.5:
                 beat_count += 1
                 last_beat_time = time.time()
-                print(f"Heartbeat {beat_count}")
-                message = f"Heartbeat {beat_count}"
+                print(f"Heartbeat detected! Total count: {beat_count}")
+                message = f"Heartbeat detected! Total count: {beat_count}"
                 await asyncio.gather(*(client.send(message) for client in connected))
             await asyncio.sleep(0.1)
     except KeyboardInterrupt:
@@ -48,7 +59,7 @@ if __name__ == '__main__':
     ads.gain = 2/3
     chan = AnalogIn(ads, ADS.P0)
 
-    start_server = websockets.serve(server, "localhost", 8765)
+    start_server = websockets.serve(server, "0.0.0.0", 8765)
 
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().create_task(count_heartbeats(chan))
