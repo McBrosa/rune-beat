@@ -27,8 +27,8 @@ async def count_heartbeats(chan):
             if voltage > dynamic_threshold and (time.time() - last_beat_time) > 0.5:
                 beat_count += 1
                 last_beat_time = time.time()
-                print(f"Heartbeat detected! Total count: {beat_count}")
-                message = f"Heartbeat detected! Total count: {beat_count}"
+                print(f"Heartbeat {beat_count}")
+                message = f"Heartbeat {beat_count}"
                 await asyncio.gather(*(client.send(message) for client in connected))
             await asyncio.sleep(0.1)
     except KeyboardInterrupt:

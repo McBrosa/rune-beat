@@ -8,25 +8,25 @@ pause_script = False
 
 async def check_for_pause():
     global pause_script
-    while True:  # Continuously check for the pause key
-        if keyboard.is_pressed('ctrl+shift+space'):  # Check if the pause key combination is pressed
-            pause_script = not pause_script  # Toggle the pause state
+    while True:
+        if keyboard.is_pressed('ctrl+shift+space'):
+            pause_script = not pause_script
             print("Pausing..." if pause_script else "Resuming...")
-            while keyboard.is_pressed('ctrl+shift+space'):  # Wait for the key combination to be released
-                await asyncio.sleep(0.1)  # Non-blocking wait
+            while keyboard.is_pressed('ctrl+shift+space'):
+                await asyncio.sleep(0.1)
             if pause_script:
                 print("Paused. Press 'ctrl+shift+space' to resume.")
             else:
                 print("Resumed.")
-        await asyncio.sleep(0.1)  # Check every 0.1 seconds to reduce CPU usage
+        await asyncio.sleep(0.1)
 
 async def message_handler(uri):
     async with websockets.connect(uri) as websocket:
         async for message in websocket:
             if pause_script:
-                await asyncio.sleep(1)  # Wait a bit before checking again if the script is still paused
+                await asyncio.sleep(1)
                 continue
-            print(f"Message received: {message}")
+            print(f"Received: {message}")
             pyautogui.click()
 
 async def main():
